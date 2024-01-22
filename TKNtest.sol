@@ -1,30 +1,29 @@
-// SPDX-License-Identifier: MIT LICENSE
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.20;
 
-pragma solidity >= 0.8;
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
+import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
+contract TKNtest is ERC20, ERC20Burnable, Ownable {
+    using SafeMath for uint256;
 
+    mapping(address => uint256) private _balances;
+    mapping(address => bool) controllers;
 
-contract TOKENtest is ERC20, ERC20Burnable, Ownable {
-  using SafeMath for uint256;
+    uint256 private _totalSupply;
+    uint256 private MAXSUP;
+    uint256 constant MAXIMUMSUPPLY=30000000*10**18;
 
+    constructor(address initialOwner)
+        ERC20("TKNtest", "XTKN")
+        Ownable(initialOwner) {
+            _mint(msg.sender, 6000000*10**18);
+        }
 
-  mapping(address => uint256) private _balances;
-  mapping(address => bool) controllers;
-
-  uint256 private _totalSupply;
-  uint256 private MAXSUP;
-  uint256 constant MAXIMUMSUPPLY=30000000*10**18;
-  
-  constructor() ERC20("TOKENtest", "TKNt") {
-      _mint(msg.sender, 6000000*10**18);
-  }
-
-  function mint(address to, uint256 amount) external {
+    function mint(address to, uint256 amount) external {
     require(controllers[msg.sender], "Only controllers can mint");
     require((MAXSUP+amount)<=MAXIMUMSUPPLY, "Maximum supply has been reached");
     _totalSupply = _totalSupply.add(amount);
@@ -33,13 +32,13 @@ contract TOKENtest is ERC20, ERC20Burnable, Ownable {
     _mint(to, amount);
   }
 
-  function mintAirdrop(address[] calldata holder, uint256 amount) external {
+    function mintAirdrop(address[] calldata holder, uint256 amount) external {
     require(controllers[msg.sender], "Only controllers can mint");
     for (uint256 i = 0; i < holder.length; i++)
       _mint(holder[i], amount);
   }
 
-  function burnFrom(address account, uint256 amount) public override {
+    function burnFrom(address account, uint256 amount) public override {
       if (controllers[msg.sender]) {
           _burn(account, amount);
       }
@@ -48,7 +47,7 @@ contract TOKENtest is ERC20, ERC20Burnable, Ownable {
       }
   }
 
-  function addController(address controller) external onlyOwner {
+    function addController(address controller) external onlyOwner {
     controllers[controller] = true;
   }
 
